@@ -1,1 +1,30 @@
+# Docker镜像
+target/
+*.jar
 *.tar
+*.war
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# 临时文件
+tmp/
+temp/
