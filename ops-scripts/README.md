@@ -54,7 +54,64 @@ ssh root@8.163.25.118 "echo 'SSH免密登录成功！'"
 
 ---
 
-## 🔍 二、服务状态检查
+## 🚀 二、微服务重新部署流程
+
+当代码有更新时，按照以下流程重新编译、打包、部署微服务。
+
+### 前置条件
+
+- ✅ SSH免密登录已配置
+- ✅ Minikube集群正常运行
+- ✅ 服务器上有项目代码 `/root/ecommerce-project/`
+
+### 🎯 完整部署流程
+
+**步骤1：上传最新代码到服务器**
+
+```powershell
+# 在项目根目录执行（包含 ecommerce-project 文件夹的目录）
+scp -r ecommerce-project/* root@8.163.25.118:/root/ecommerce-project/
+
+# 或者使用绝对路径（替换为您的实际路径）
+scp -r D:\Project\paral\CourseProject\ecommerce-project\* root@8.163.25.118:/root/ecommerce-project/
+```
+
+⚠️ **注意**：只需上传代码文件，**不需要上传以下tar镜像文件**：
+- `redis7.tar` - Redis镜像（服务器已配置阿里云镜像源自动拉取）
+- `mysql8.tar` - MySQL镜像（服务器已配置阿里云镜像源自动拉取）
+- `mongo6.tar` - MongoDB镜像（服务器已配置阿里云镜像源自动拉取）
+- `nginx-alpine.tar` - Nginx镜像（服务器已配置阿里云镜像源自动拉取）
+
+这些中间件镜像在服务器上会通过K8s自动从阿里云镜像仓库拉取，无需手动上传。
+
+**步骤2：执行部署脚本**
+
+```powershell
+# 检查服务状态（部署前建议先检查）
+ssh root@8.163.25.118 "/root/check-status.sh"
+
+# 部署单个服务（例如cart-service）
+ssh root@8.163.25.118 "/root/deploy-single.sh cart-service"
+
+# 部署所有服务（谨慎使用，耗时较长）
+ssh root@8.163.25.118 "/root/deploy-all.sh"
+```
+
+**步骤3：验证部署结果**
+
+```powershell
+# 再次检查服务状态
+ssh root@8.163.25.118 "/root/check-status.sh"
+
+# 查看服务日志
+ssh root@8.163.25.118 "kubectl logs -f deployment/cart-service"
+```
+
+📖 **详细说明**: 查看 [USAGE.md](./USAGE.md) 获取每个脚本的参数说明和常见问题解答
+
+---
+
+## 🔍 三、服务状态检查
 
 ### 快速检查所有组件
 
@@ -210,75 +267,6 @@ ssh root@8.163.25.118 "echo '连接成功！'"
 1. **私钥安全**：私钥文件（`id_rsa`）绝对不能上传到Git仓库或分享给他人
 2. **PowerShell特殊字符**：在PowerShell中执行远程命令时，注意变量转义使用单引号
 3. **首次使用**：如果是第一次连接，会提示确认主机指纹，输入`yes`即可
-
----
-
-## 🚀 三、微服务重新部署流程
-
-当代码有更新时，按照以下流程重新编译、打包、部署微服务。
-
-### 前置条件
-
-- ✅ SSH免密登录已配置
-- ✅ Minikube集群正常运行
-- ✅ 服务器上有项目代码 `/root/ecommerce-project/`
-
-### 🚀 快速开始（推荐使用脚本）
-
-我们提供了三个运维脚本，可以大大简化部署和检查工作。
-
-#### 📦 脚本列表
-
-| 脚本名称 | 功能 | 使用场景 |
-|---------|------|----------|
-| `deploy-all.sh` | 一键部署所有微服务 | 代码重大更新后重新部署 |
-| `deploy-single.sh` | 部署单个微服务 | 只修改了某个服务时 |
-| `check-status.sh` | 快速检查服务状态 | 日常巡检、故障排查 |
-
-#### 🎯 使用方法
-
-**检查服务状态**
-
-```powershell
-ssh root@8.163.25.118 "/root/check-status.sh"
-```
-
-**部署单个服务**
-
-```powershell
-# 部署cart-service
-ssh root@8.163.25.118 "/root/deploy-single.sh cart-service"
-
-# 部署user-service
-ssh root@8.163.25.118 "/root/deploy-single.sh user-service"
-
-# 部署product-service
-ssh root@8.163.25.118 "/root/deploy-single.sh product-service"
-```
-
-**部署所有服务**（谨慎使用，耗时较长）
-
-```powershell
-ssh root@8.163.25.118 "/root/deploy-all.sh"
-```
-
-📖 **详细说明**: 查看 [USAGE.md](./USAGE.md) 获取每个脚本的参数说明和常见问题解答
-
----
-
-### 📝 手动部署方法（供学习参考）
-
-如果您想了解部署的底层原理，可以参考以下手动部署步骤。但**强烈建议使用上面的脚本**，更高效且不易出错。
-
-**基本流程：**
-1. 上传最新代码到服务器（scp或git pull）
-2. Maven编译打包
-3. 构建Docker镜像
-4. 加载镜像到Minikube
-5. 重启Kubernetes Deployment
-6. 验证Pod状态
-
-📖 **详细的手动部署命令**: 请查看 [USAGE.md](./USAGE.md) 中的“手动部署方法”章节
 
 ---
 
