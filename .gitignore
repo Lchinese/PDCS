@@ -31,3 +31,6 @@ target/
 
 # 环境变量
 .env
+
+# Docker image tar files
+*.tar
